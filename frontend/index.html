@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitHub Events</title>
+  </head>
+  <body>
+    <h2>Live GitHub Events</h2>
+    <ul id="events"></ul>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        async function fetchEvents() {
+          const res = await fetch("http://localhost:5000/events");
+          const data = await res.json();
+
+          const list = document.getElementById("events");
+          list.innerHTML = "";
+
+          data.forEach((ev) => {
+            let msg = `${ev.author} `;
+            if (ev.type === "push") {
+              msg += `pushed to ${ev.to_branch}`;
+            } else if (ev.type === "pull_request") {
+              msg += `submitted a pull request from ${ev.from_branch} to ${ev.to_branch}`;
+            } else if (ev.type === "merge") {
+              msg += `merged branch ${ev.from_branch} to ${ev.to_branch}`;
+            }
+            msg += ` on ${new Date(ev.timestamp).toUTCString()}`;
+
+            const li = document.createElement("li");
+            li.textContent = msg;
+            list.appendChild(li);
+          });
+        }
+
+        fetchEvents();
+        setInterval(fetchEvents, 15000); // Refresh every 15s
+      });
+    </script>
+  </body>
+</html>
